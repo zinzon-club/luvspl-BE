@@ -1,0 +1,68 @@
+# ------------------------------
+# JetBrains IDE default ignores
+# ------------------------------
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Editor-based HTTP client requests
+/httpRequests/
+
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+
+# ------------------------------
+# Python
+# ------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+.eggs/
+build/
+develop-eggs/
+dist/
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# mypy / pytest / coverage / cache
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache/
+
+# ------------------------------
+# IDE / Editor files
+# ------------------------------
+.idea/
+*.iml
+.vscode/
+
+# Mac OS
+.DS_Store
+
+# ------------------------------
+# Environment / Secrets
+# ------------------------------
+.env
+.env.*
+*.env
