@@ -1,0 +1,9 @@
+fastapi
+pydantic
+supabase
+uvicorn
+python-dotenv
+starlette
+httpx
+PyJWT
+itsdangerous
