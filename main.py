@@ -6,9 +6,10 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 import os
 from starlette.middleware.sessions import SessionMiddleware
-from web import auth
+from web import auth, profile
 app = FastAPI()
 app.include_router(auth.router)
+app.include_router(profile.router)
 
 app.add_middleware(
     CORSMiddleware,
