@@ -23,5 +23,6 @@ app.add_middleware(
 
 app.add_middleware(SessionMiddleware, session_cookie="cookie", same_site="none", https_only=True, secret_key=os.environ["SESSION_SECRET_KEY"])
 
-if __name__ == '__main__':
-    uvicorn.run('main:app', port=8000, reload=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
