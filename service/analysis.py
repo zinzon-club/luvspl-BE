@@ -5,7 +5,6 @@ from typing import Dict, List
 
 # --- 설정 (Configuration) ---
 
-# 카테고리 정의 (한국어 -> 영어)
 CATEGORY_MAP: Dict[str, str] = {
     "공격적인": "aggressive",
     "무시하는": "ignoring",
@@ -13,10 +12,8 @@ CATEGORY_MAP: Dict[str, str] = {
     "중립적인": "neutral"
 }
 
-# 분석할 주요 카테고리 (영어 이름)
 PRIMARY_ANALYSIS_CATEGORIES: List[str] = ["aggressive", "ignoring", "cold"]
 
-# 피드백 설정: 비율에 따라 다른 피드백 제공
 FEEDBACK_CONFIG = {
     "aggressive": [
         {"threshold": 30, "format": '공격적인 표현(예: "{example}")의 사용 빈도가 {ratio:.0f}%로 매우 높습니다. 이는 상대방에게 상처를 줄 수 있으니, 의식적으로 줄여보는 노력이 필요해 보입니다.'},
@@ -31,15 +28,12 @@ FEEDBACK_CONFIG = {
         {"threshold": 20, "format": '단답형이거나 차가운 느낌의 대화(예: "{example}")가 전체의 {ratio:.0f}%를 차지하고 있어요. "그렇구나!", "네 말이 맞아."처럼 리액션을 더해주면 대화가 훨씬 부드러워질 거예요.'}
     ],
     "positive": [
-        # condition: 'less_than'은 비율이 threshold 미만일 때 피드백을 생성
         {"threshold": 10, "condition": "less_than", "format": '긍정적인 표현의 비율이 {ratio:.0f}%로 낮은 편입니다. "고마워", "좋은 생각이야" 와 같이 긍정적인 표현을 더 자주 사용해보세요.'}
     ],
     "neutral": [
         {"threshold": 80, "condition": "greater_than", "format": "대화의 {ratio:.0f}%가 중립적인 내용으로 이루어져 있습니다. 때로는 감정을 표현하거나 유머를 더해 대화를 더 풍부하게 만들어보는 것은 어떨까요?"}
     ]
 }
-
-# 기본 피드백: 특별한 피드백이 생성되지 않았을 경우 사용
 DEFAULT_FEEDBACK = "대화 분석 결과, 전반적으로 좋은 대화 습관을 가지고 계십니다! 지금처럼만 유지해주세요."
 
 
@@ -51,7 +45,6 @@ def generate_dynamic_feedback(analysis_results: dict) -> list:
     feedback_added_for_category = set()
 
     for category, configs in FEEDBACK_CONFIG.items():
-        # threshold가 높은 순으로 정렬
         sorted_configs = sorted(configs, key=lambda x: x['threshold'], reverse=True)
 
         for config in sorted_configs:
@@ -70,10 +63,11 @@ def generate_dynamic_feedback(analysis_results: dict) -> list:
             if should_add_feedback:
                 format_kwargs = {"ratio": ratio}
                 if "{example}" in config["format"]:
-                    examples = analysis_results.get(f"{category}_examples", [])
-                    if not examples:
-                        continue  # 예시가 필요한데 없는 경우 건너뛰기
-                    format_kwargs["example"] = random.choice(examples)
+                    examples_with_scores = analysis_results.get(f"{category}_examples", [])
+                    if not examples_with_scores:
+                        continue
+                    best_example_message = max(examples_with_scores, key=lambda x: x[1])[0]
+                    format_kwargs["example"] = best_example_message
 
                 feedback.append(config["format"].format(**format_kwargs))
                 feedback_added_for_category.add(category)
@@ -95,11 +89,9 @@ def analyze_conversation(df: pd.DataFrame, user_name: str, sentiment_model, clas
 
     messages = user_df["Message"].dropna().tolist()
     messages = [msg for msg in messages if msg != '이모티콘']
-    # 메시지 샘플링
     if len(messages) > 500:
         messages = random.sample(messages, 500)
 
-    # 모델 최대 길이에 맞게 메시지 자르기
     messages = [msg[:400] for msg in messages]
 
     if not messages:
@@ -107,27 +99,25 @@ def analyze_conversation(df: pd.DataFrame, user_name: str, sentiment_model, clas
 
     total_messages = len(messages)
 
-    # 감정 분석 (긍정/부정)
     sentiments = sentiment_model(messages)
-    neg_count = sum(1 for s in sentiments if s["label"].lower().startswith("neg"))
-    pos_count = sum(1 for s in sentiments if s["label"].lower().startswith("pos"))
+    neg_count = sum(1 for s in sentiments if "부정" in s["label"] or "neg" in s["label"].lower())
+    pos_count = sum(1 for s in sentiments if "긍정" in s["label"] or "pos" in s["label"].lower())
     negative_ratio = (neg_count / total_messages) * 100 if total_messages > 0 else 0
     positive_ratio = (pos_count / total_messages) * 100 if total_messages > 0 else 0
 
-    # 대화 유형 분류 (공격적, 무시하는, 차가운, 중립적인)
     candidate_labels = list(CATEGORY_MAP.keys())
     category_counts = {label: 0 for label in candidate_labels}
-    category_examples = {label: [] for label in candidate_labels}
+    category_examples: Dict[str, List[tuple[str, float]]] = {label: [] for label in candidate_labels}
 
-    results = classifier(messages, candidate_labels, multi_label=False)
+    results = classifier(messages, candidate_labels, multi_label=False, hypothesis_template="이 문장의 내용은 {}이다.")
 
     for i, result in enumerate(results):
         top_label = result['labels'][0]
+        top_score = result['scores'][0]
         category_counts[top_label] += 1
         if CATEGORY_MAP.get(top_label) in PRIMARY_ANALYSIS_CATEGORIES:
-            category_examples[top_label].append(messages[i])
+            category_examples[top_label].append((messages[i], top_score))
 
-    # 분석 결과 정리
     analysis_results = {
         "total_messages": total_messages,
         "negative_ratio": round(negative_ratio, 2),
@@ -140,11 +130,9 @@ def analyze_conversation(df: pd.DataFrame, user_name: str, sentiment_model, clas
         if eng_label in PRIMARY_ANALYSIS_CATEGORIES:
             analysis_results[f"{eng_label}_examples"] = category_examples.get(kor_label, [])
 
-    # 동적 피드백 생성
     feedback = generate_dynamic_feedback(analysis_results)
     analysis_results["feedback"] = feedback
 
-    # 최종 결과에서 예시 데이터 제거
     final_results = {k: v for k, v in analysis_results.items() if not k.endswith("_examples")}
 
     return final_results
