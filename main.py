@@ -16,6 +16,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://luvspl-fe.vercel.app",
+        "https://luvspl.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
