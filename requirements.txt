@@ -10,7 +10,7 @@ itsdangerous
 pandas
 requests
 python-dotenv
-transformers
-torch==2.3.0+cpu
+transformers==4.36.0
 opencv-python-headless
 numpy==1.26.4
+torch
