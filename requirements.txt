@@ -7,3 +7,7 @@ starlette
 httpx
 PyJWT
 itsdangerous
+pandas
+requests
+python-dotenv
+numpy
