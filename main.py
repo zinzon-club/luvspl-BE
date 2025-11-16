@@ -8,8 +8,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 import os
 from starlette.middleware.sessions import SessionMiddleware
-from web import auth, profile
-from web import auth, analyzer
+from web import auth, profile, analyzer
 
 app = FastAPI()
 
