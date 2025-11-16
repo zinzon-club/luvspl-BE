@@ -13,7 +13,7 @@ def generate_todo(req: dict):
     analysis_data = AnalysisData()
     analysis = analysis_data.get_analysis(1)  # 예시: ID 1 고정
 
-    # 2) Gemini로 TODO 생성
+    # Gemini로 TODO 생성
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
     prompt = f"""
@@ -31,7 +31,7 @@ def generate_todo(req: dict):
 
     todos = eval(response.text)
 
-    # 3) Supabase에 저장
+    # 저장
     todo_data = TodoData()
     saved = []
 
