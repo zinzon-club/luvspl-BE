@@ -9,7 +9,6 @@ PyJWT
 itsdangerous
 pandas
 requests
-python-dotenv
 transformers==4.36.0
 opencv-python-headless
 numpy==1.26.4
