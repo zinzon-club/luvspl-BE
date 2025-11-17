@@ -31,29 +31,6 @@ app.add_middleware(
 )
 app.add_middleware(SessionMiddleware, session_cookie="cookie", same_site="none", https_only=True, secret_key=os.environ["SESSION_SECRET_KEY"])
 
-# --- Swagger UI 전역 인증 설정 ---
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-        title="Luvspl API",
-        version="1.0.0",
-        description="Luvspl-BE API Documentation",
-        routes=app.routes,
-    )
-    openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-        }
-    }
-    openapi_schema["security"] = [{"BearerAuth": []}]
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
-# ---------------------------------
 
 if __name__ == '__main__':
     uvicorn.run('main:app', port=8000, reload=True)
