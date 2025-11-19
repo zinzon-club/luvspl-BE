@@ -14,3 +14,4 @@ opencv-python-headless
 numpy==1.26.4
 torch
 sentencepiece
+protobuf
