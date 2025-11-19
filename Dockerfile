@@ -14,18 +14,12 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 🔥🔥🔥 모델을 미리 다운로드 (중요)
-RUN python - <<EOF
-from transformers import AutoTokenizer, AutoModel
-print("Downloading model...")
-AutoTokenizer.from_pretrained("beomi/KcELECTRA-base-v2022")
-AutoModel.from_pretrained("beomi/KcELECTRA-base-v2022")
-print("Model download complete.")
-EOF
-
 COPY . .
 
-# HuggingFace 재다운로드 방지
-ENV HF_HUB_OFFLINE=1
+# HuggingFace 캐싱 디렉토리 고정
+ENV TRANSFORMERS_CACHE=/app/cache/huggingface
+
+# 캐시 폴더 생성
+RUN mkdir -p /app/cache/huggingface
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
