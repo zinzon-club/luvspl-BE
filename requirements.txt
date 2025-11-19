@@ -10,3 +10,9 @@ torch==2.9.0
 pydantic==2.12.1
 python-multipart==0.0.20
 PyJWT==2.10.1
+sentencepiece
+protobuf
+opencv-python-headless
+numpy==1.26.4
+itsdangerous
+requests
