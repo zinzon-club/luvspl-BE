@@ -13,3 +13,4 @@ transformers==4.36.0
 opencv-python-headless
 numpy==1.26.4
 torch
+sentencepiece
