@@ -1,7 +1,9 @@
 fastapi
+pydantic
+supabase
 uvicorn
 python-dotenv
-pydantic
+starlette
 httpx
 PyJWT
 itsdangerous

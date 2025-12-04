@@ -1,10 +1,13 @@
 services:
   backend:
-    build: .
+    image: 123isi/luvspl-backend:latest
     container_name: fastapi-backend
     env_file: .env
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
