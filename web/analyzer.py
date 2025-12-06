@@ -1,11 +1,11 @@
-from fastapi import APIRouter, UploadFile, Form, HTTPException, Query
+from fastapi import APIRouter, UploadFile, Form, HTTPException, Depends
 import pandas as pd
 from transformers import pipeline
 from model.sentiment_model import load_sentiment_model
 from service.analysis import analyze_conversation
 from data.analyze import save_analysis, get_analyses_by_user
+from utils.JWT import get_current_user
 
-# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/kakao/token-login")
 router = APIRouter()
 
 print("Loading models...")
@@ -19,8 +19,8 @@ print("Models loaded successfully.")
 @router.post("/analyze")
 async def analyze_file(
     file: UploadFile,
-    user_id: int,
     username: str = Form(...),
+    user_id: int = Depends(get_current_user)
 ):
 
     df = pd.read_csv(file.file)
@@ -30,10 +30,7 @@ async def analyze_file(
 
 
 @router.get("/analyze/history")
-async def get_analysis_history(user_id: int = Query(..., description="User identifier")):
-    """
-    Return every saved analysis row tied to the provided user_id.
-    """
+async def get_analysis_history(user_id: int = Depends(get_current_user)):
     try:
         analyses = get_analyses_by_user(user_id)
     except Exception as e:

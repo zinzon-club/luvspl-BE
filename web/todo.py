@@ -1,18 +1,16 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
-from data.todo import TodoData
-from model.todo import Todo
+from fastapi import APIRouter, Depends
+from service import todo as todo_service
+from utils.JWT import get_current_user
 
 router = APIRouter()
 
-@router.post("/todo")
-def create_todo(req: Todo):
-    todo_data = TodoData()
-    data = todo_data.create_todo(req.text, req.completed)
-    return {"success": True, "data": data}
+@router.get("/generate")
+def generate_todo_api(user_id: int = Depends(get_current_user)):
+    saved = todo_service.generate_todo(user_id)
+    return {"success": True, "todos": saved}
 
-@router.get("/todo")
-def get_todos():
-    todo_data = TodoData()
-    data = todo_data.get_todos()
-    return {"success": True, "data": data}
+@router.patch("/todos/{todo_id}")
+def update_todo(todo_id: int, payload: dict = {}, user_id: int = Depends(get_current_user)):
+    complete = payload.get("complete")
+    updated = todo_service.update_todo_status(todo_id, complete, user_id)
+    return updated

@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 import os
 from starlette.middleware.sessions import SessionMiddleware
-from web import auth, profile, analyzer
+from web import auth, profile, analyzer, todo
 
 app = FastAPI()
 
@@ -16,6 +16,7 @@ app = FastAPI()
 app.include_router(auth.router)
 app.include_router(profile.router)
 app.include_router(analyzer.router)
+app.include_router(todo.router)
 
 # 미들웨어 추가
 app.add_middleware(
