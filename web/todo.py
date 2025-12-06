@@ -1,13 +1,15 @@
-from fastapi import APIRouter
-from service.todo import generate_todo
+from fastapi import APIRouter, Depends
+from service import todo as todo_service
+from utils.JWT import get_current_user
 
-router = APIRouter(prefix="")
+router = APIRouter()
 
 @router.get("/generate")
-def generate_todo_api():
-    result = generate_todo()
+def generate_todo_api(user_id: int = Depends(get_current_user)):
+    saved = todo_service.generate_todo(user_id)
+    return {"success": True, "todos": saved}
 
-    return {
-        "success": True,
-        "todos": result
-    }
+@router.get("/todos")
+def get_todos_api(user_id: int = Depends(get_current_user)):
+    todos = todo_service.get_user_todos(user_id)
+    return {"success": True, "todos": todos}

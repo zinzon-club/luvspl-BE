@@ -1,30 +1,12 @@
-from supabase import create_client
 import os
+from supabase import create_client
 
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY"))
 
-class TodoData:
-    def create_todo(self, text: str, completed: bool = False, created_at: str = None):
-        if created_at is None:
-            created_at = datetime.now().strftime("%Y-%m-%d")
-
-        resp = (
-            self.supabase.table("todo")
-            .upsert({
-                "id": id,
-                "todos": text,
-                "completed": completed,
-                "created_at": created_at,
-                "user_id": user_id
-            })
-            .execute()
-        )
-        return resp.data
-
-    def get_todos(self):
-        resp = (
-            self.supabase.table("todo")
-            .select("*")
-            .execute()
-        )
-        return resp.data
+def get_todos_by_user(user_id: int):
+    try:
+        response = supabase.table("todo").select("*").eq("user_id", user_id).execute()
+        return response.data
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch todos for user {user_id}: {e}")
+        return []
