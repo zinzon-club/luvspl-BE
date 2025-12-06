@@ -1,18 +1,13 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
-from data.todo import TodoData
-from model.todo import Todo
+from service.todo import generate_todo
 
-router = APIRouter()
+router = APIRouter(prefix="")
 
-@router.post("/todo")
-def create_todo(req: Todo):
-    todo_data = TodoData()
-    data = todo_data.create_todo(req.text, req.completed)
-    return {"success": True, "data": data}
+@router.get("/generate")
+def generate_todo_api():
+    result = generate_todo()
 
-@router.get("/todo")
-def get_todos():
-    todo_data = TodoData()
-    data = todo_data.get_todos()
-    return {"success": True, "data": data}
+    return {
+        "success": True,
+        "todos": result
+    }
