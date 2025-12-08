@@ -1,10 +1,9 @@
-from fastapi import APIRouter, UploadFile, Form, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, Form, HTTPException, Query
 import pandas as pd
 from transformers import pipeline
 from model.sentiment_model import load_sentiment_model
 from service.analysis import analyze_conversation
 from data.analyze import save_analysis, get_analyses_by_user
-from utils.JWT import get_current_user
 
 router = APIRouter()
 
@@ -20,7 +19,7 @@ print("Models loaded successfully.")
 async def analyze_file(
     file: UploadFile,
     username: str = Form(...),
-    user_id: int = Depends(get_current_user)
+    user_id: int = Query(...)
 ):
 
     df = pd.read_csv(file.file)
@@ -30,7 +29,7 @@ async def analyze_file(
 
 
 @router.get("/analyze/history")
-async def get_analysis_history(user_id: int = Depends(get_current_user)):
+async def get_analysis_history(user_id: int):
     try:
         analyses = get_analyses_by_user(user_id)
     except Exception as e:
